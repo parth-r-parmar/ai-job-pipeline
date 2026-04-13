@@ -1,0 +1,79 @@
+{
+  "name": "John Doe",
+  "contact": {
+    "phone": "+1 555-123-4567",
+    "email": "john.doe@email.com",
+    "github": "github.com/johndoe",
+    "linkedin": "linkedin.com/in/johndoe",
+    "location": "San Francisco, USA"
+  },
+  "summary": "Full Stack Developer with 3+ years of experience building web applications using React, Node.js, and TypeScript. Passionate about clean code, performance optimization, and delivering great user experiences.",
+  "core_competencies": [
+    "React.js Architecture",
+    "Node.js Backend Development",
+    "TypeScript",
+    "RESTful API Design",
+    "Performance Optimization",
+    "Test-Driven Development",
+    "AWS Cloud Services",
+    "PostgreSQL & MongoDB"
+  ],
+  "education": [
+    {
+      "institution": "University of California",
+      "location": "California, USA",
+      "degree": "Bachelor of Science in Computer Science; GPA: 3.5/4.0",
+      "dates": "Aug 2017 - May 2021"
+    }
+  ],
+  "skills": {
+    "Languages": "JavaScript (ES6+), TypeScript, Python, HTML5, CSS3",
+    "Frameworks & Libraries": "React.js, Redux, Next.js, Node.js, Express.js, TailwindCSS",
+    "Databases": "PostgreSQL, MongoDB, Redis",
+    "APIs & Protocols": "RESTful APIs, GraphQL, WebSocket",
+    "DevOps & Tools": "Git, GitHub, Docker, AWS (S3, Lambda), CI/CD, Jest, Cypress",
+    "Concepts": "Microservices, Agile/Scrum, Responsive Design, Test-Driven Development"
+  },
+  "experience": [
+    {
+      "company": "TechCorp Inc.",
+      "role": "Full Stack Developer",
+      "dates": "Jun 2022 - Present",
+      "bullets": [
+        "Built and maintained 10+ React components used across 3 client-facing products, improving code reuse by 40%.",
+        "Developed RESTful APIs using Node.js and Express, serving 50K+ daily active users.",
+        "Implemented real-time notification system using WebSocket, reducing user response time by 60%.",
+        "Led migration from JavaScript to TypeScript across the frontend codebase, catching 200+ type-related bugs."
+      ]
+    },
+    {
+      "company": "StartupXYZ",
+      "role": "Frontend Developer",
+      "dates": "Jul 2021 - May 2022",
+      "bullets": [
+        "Developed responsive web application using React.js and Redux, achieving 95+ Lighthouse performance score.",
+        "Integrated third-party payment APIs (Stripe, PayPal), processing $2M+ in monthly transactions.",
+        "Built automated testing suite with Jest and Cypress, increasing code coverage from 30% to 85%."
+      ]
+    }
+  ],
+  "projects": [
+    {
+      "name": "TaskFlow - Project Management Tool",
+      "link": "github.com/johndoe/taskflow",
+      "bullets": [
+        "Built a Trello-like project management app with drag-and-drop, real-time collaboration, and team chat.",
+        "Implemented authentication with JWT and OAuth2 (Google, GitHub), supporting 500+ registered users.",
+        "Deployed on AWS using Docker containers with CI/CD pipeline via GitHub Actions."
+      ]
+    },
+    {
+      "name": "CodeReview Bot",
+      "link": null,
+      "bullets": [
+        "Created a GitHub bot that automatically reviews pull requests using OpenAI GPT API for code quality suggestions.",
+        "Reduced average code review time by 40% across 3 open-source repositories."
+      ]
+    }
+  ]
+}
