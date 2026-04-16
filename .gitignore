@@ -30,3 +30,4 @@ tailored_resumes/
 # OS
 .DS_Store
 Thumbs.db
+.superpowers/
