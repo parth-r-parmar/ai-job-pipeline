@@ -6,15 +6,20 @@ description quality, salary disclosure, and title specificity.
 
 import re
 import logging
-from datetime import datetime, timedelta
+from datetime import datetime
 
 logger = logging.getLogger(__name__)
 
 # Vague title patterns that suggest ghost/bulk postings
 VAGUE_TITLES = {
-    "multiple openings", "various positions", "hiring",
+    "multiple openings", "various positions",
     "urgent requirement", "walk-in", "immediate joiner",
 }
+
+# Pre-compiled regex for posting age parsing
+_RE_DAYS = re.compile(r"(\d+)\s*days?\s*ago")
+_RE_WEEKS = re.compile(r"(\d+)\s*weeks?\s*ago")
+_RE_MONTHS = re.compile(r"(\d+)\s*months?\s*ago")
 
 
 def _parse_posting_age_days(posted_str: str) -> int | None:
@@ -23,18 +28,15 @@ def _parse_posting_age_days(posted_str: str) -> int | None:
         return None
     s = posted_str.lower().strip()
 
-    # "X days ago", "X day ago"
-    m = re.search(r"(\d+)\s*days?\s*ago", s)
+    m = _RE_DAYS.search(s)
     if m:
         return int(m.group(1))
 
-    # "X weeks ago"
-    m = re.search(r"(\d+)\s*weeks?\s*ago", s)
+    m = _RE_WEEKS.search(s)
     if m:
         return int(m.group(1)) * 7
 
-    # "X months ago"
-    m = re.search(r"(\d+)\s*months?\s*ago", s)
+    m = _RE_MONTHS.search(s)
     if m:
         return int(m.group(1)) * 30
 

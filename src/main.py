@@ -24,8 +24,8 @@ from src.resume_parser import get_search_keywords
 from src.scrapers import ALL_SCRAPERS
 from src.filters import filter_jobs
 from src.ghost_detector import flag_ghost_jobs
-from src.scorer import score_all_jobs
-from src.tailor import tailor_and_generate
+from src.scorer import score_job
+from src.tailor import tailor_and_generate, _sanitize_filename
 from src.exporter import export
 
 logging.basicConfig(
@@ -88,8 +88,11 @@ def _load_previous_results(excel_path: str) -> dict:
                     "missing_keywords": (job.get("Missing Keywords") or "").split(", "),
                 }
         wb.close()
+        if not prev and ws.max_row > 1:
+            logger.warning("  Previous Excel had rows but no scores loaded — column names may have changed")
         return prev
-    except Exception:
+    except Exception as e:
+        logger.warning(f"  Could not load previous results: {e}")
         return {}
 
 
@@ -99,9 +102,8 @@ def _job_key(job: dict) -> str:
 
 def _tailor_exists(job: dict) -> str | None:
     """Check if tailored JSON already exists. Returns path if found."""
-    import re
-    company = re.sub(r"[^\w\-]", "", job.get("company", "unknown").replace(" ", "_"))[:50]
-    title = re.sub(r"[^\w\-]", "", job.get("title", "unknown").replace(" ", "_"))[:50]
+    company = _sanitize_filename(job.get("company", "unknown"))
+    title = _sanitize_filename(job.get("title", "unknown"))
     json_path = os.path.join(TAILORED_DIR, f"{company}_{title}.json")
     pdf_path = os.path.join(TAILORED_DIR, f"{company}_{title}.pdf")
     if os.path.exists(json_path) and os.path.exists(pdf_path):
@@ -312,12 +314,12 @@ def main():
 
     # Score
     if args.scorer == "cli":
-        from src.scorer_cli import score_all_jobs as _score_fn
+        from src.scorer_cli import score_job as _score_one
         from src.tailor_cli import tailor_and_generate as _tailor_fn
         ai_available = True
         ai_label = "Claude CLI"
     else:
-        _score_fn = score_all_jobs
+        _score_one = score_job
         _tailor_fn = tailor_and_generate
         ai_available = bool(ANTHROPIC_API_KEY)
         ai_label = "Anthropic API"
@@ -337,7 +339,8 @@ def main():
                 logger.info(f"  [{i}/{len(all_jobs)}] SKIP (cached): {job.get('title')} at {job.get('company')}")
             else:
                 logger.info(f"  [{i}/{len(all_jobs)}] {job.get('title')} at {job.get('company')}")
-                result = _score_fn([job])  # score single job
+                result = _score_one(job)
+                job.update(result)
                 if i < len(all_jobs):
                     time.sleep(0.5)
 

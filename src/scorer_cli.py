@@ -104,7 +104,7 @@ def score_job(job: dict) -> dict:
         location=job.get("location", ""),
         experience=job.get("experience", ""),
         job_type=job.get("job_type", ""),
-        description=job.get("description", "")[:2000],
+        description=job.get("description", "")[:3000],
     )
 
     response = _call_claude_cli(prompt)
