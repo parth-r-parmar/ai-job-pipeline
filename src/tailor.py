@@ -164,7 +164,10 @@ def generate_tailored_pdf(tailored: dict, job: dict, pdf_style: str = "classic")
             path = os.path.join(TAILORED_RESUMES_DIR, f"{base_name}{'_modern' if pdf_style == 'both' else ''}.pdf")
             return HtmlResumePDF(tailored).build(output_path=path)
         except ImportError:
-            logger.warning("Playwright not installed. Falling back to classic PDF.")
+            logger.warning(
+                "Playwright not installed. Using classic PDF.\n"
+                "  To enable modern PDFs: pip install playwright && playwright install chromium"
+            )
             return build_classic()
 
     if pdf_style == "modern":
@@ -174,17 +177,76 @@ def generate_tailored_pdf(tailored: dict, job: dict, pdf_style: str = "classic")
     return build_classic()
 
 
+def _generate_diff(original: dict, tailored: dict, job: dict) -> str | None:
+    """Generate a text diff showing what changed between original and tailored resume."""
+    os.makedirs(TAILORED_RESUMES_DIR, exist_ok=True)
+    safe_company = _sanitize_filename(job.get("company", "unknown"))
+    safe_title = _sanitize_filename(job.get("title", "unknown"))
+    diff_path = os.path.join(TAILORED_RESUMES_DIR, f"{safe_company}_{safe_title}_diff.txt")
+
+    lines = [f"Tailoring Diff: {job.get('title')} at {job.get('company')}", "=" * 60, ""]
+
+    # Summary diff
+    if original.get("summary") != tailored.get("summary"):
+        lines.append("=== SUMMARY ===")
+        lines.append(f"- BEFORE: {original.get('summary', '')[:200]}...")
+        lines.append(f"+ AFTER:  {tailored.get('summary', '')[:200]}...")
+        lines.append("")
+
+    # Experience bullets diff
+    for i, (orig_exp, tail_exp) in enumerate(zip(original.get("experience", []), tailored.get("experience", []))):
+        for j, (ob, tb) in enumerate(zip(orig_exp.get("bullets", []), tail_exp.get("bullets", []))):
+            if ob != tb:
+                lines.append(f"=== EXPERIENCE[{i}] ({orig_exp.get('company')}) BULLET {j+1} ===")
+                lines.append(f"- BEFORE: {ob}")
+                lines.append(f"+ AFTER:  {tb}")
+                lines.append("")
+
+    # Project bullets diff
+    for i, (orig_proj, tail_proj) in enumerate(zip(original.get("projects", []), tailored.get("projects", []))):
+        for j, (ob, tb) in enumerate(zip(orig_proj.get("bullets", []), tail_proj.get("bullets", []))):
+            if ob != tb:
+                lines.append(f"=== PROJECT[{i}] ({orig_proj.get('name')}) BULLET {j+1} ===")
+                lines.append(f"- BEFORE: {ob}")
+                lines.append(f"+ AFTER:  {tb}")
+                lines.append("")
+
+    # Injected keywords
+    competencies = tailored.get("core_competencies", [])
+    if competencies:
+        lines.append("=== INJECTED KEYWORDS (core_competencies) ===")
+        for kw in competencies:
+            lines.append(f"  + {kw}")
+        lines.append("")
+
+    if len(lines) <= 3:
+        lines.append("(no changes detected)")
+
+    with open(diff_path, "w", encoding="utf-8") as f:
+        f.write("\n".join(lines))
+    return diff_path
+
+
 def tailor_and_generate(job: dict, pdf_style: str = "classic") -> str | None:
-    """Full pipeline: tailor resume + save JSON + generate PDF for one job.
+    """Full pipeline: tailor resume + save JSON + generate diff + generate PDF.
 
     Returns PDF path or None on failure.
     """
+    original = get_resume()
     tailored = tailor_resume(job)
     if tailored is None:
         return None
 
+    # Save core_competencies to job dict for Excel export
+    if tailored.get("core_competencies"):
+        job["core_competencies"] = tailored["core_competencies"]
+
     json_path = save_tailored_json(tailored, job)
     logger.info(f"  Saved tailored JSON: {json_path}")
+
+    diff_path = _generate_diff(original, tailored, job)
+    if diff_path:
+        logger.info(f"  Saved diff: {diff_path}")
 
     pdf_path = generate_tailored_pdf(tailored, job, pdf_style=pdf_style)
     logger.info(f"  Generated tailored PDF: {pdf_path}")

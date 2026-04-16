@@ -19,9 +19,11 @@ tailored_resumes/
 # Config with secrets
 .env
 
-# IDE
+# IDE & Claude Code
 .vscode/
+.vs/
 .idea/
+.claude/
 *.swp
 *.swo
 

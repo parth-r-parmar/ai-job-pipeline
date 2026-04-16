@@ -18,11 +18,11 @@ import sys
 sys.path.insert(0, os.path.dirname(__file__))
 
 from src.resume_builder.html_resume import HtmlResumePDF
-from src.config import OUTPUT_DIR
+from src.config import OUTPUT_DIR, RESUME_PATH
 
 
 def main():
-    with open("resume.json", "r", encoding="utf-8") as f:
+    with open(RESUME_PATH, "r", encoding="utf-8") as f:
         resume = json.load(f)
 
     safe_name = resume["name"].replace(" ", "_")

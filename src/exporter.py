@@ -29,20 +29,25 @@ ALL_JOBS_COLUMNS = [
     ("Company", 25),
     ("Company Type", 14),
     ("Location", 20),
+    ("Match Score", 12),
+    ("Recommendation", 18),
+    ("Reason", 40),
+    ("Ghost Risk", 10),
     ("Salary", 18),
     ("Salary (LPA)", 12),
     ("Experience", 15),
     ("Job Type", 12),
     ("Posted Date", 15),
     ("Source", 12),
-    ("Match Score", 12),
-    ("Recommendation", 18),
-    ("Reason", 40),
     ("Matched Keywords", 35),
     ("Missing Keywords", 35),
+    ("Injected Keywords", 35),
     ("URL", 45),
     ("Tailored Resume", 30),
 ]
+
+GHOST_HIGH_FILL = PatternFill(start_color="FFC7CE", end_color="FFC7CE", fill_type="solid")
+GHOST_MED_FILL = PatternFill(start_color="FFEB9C", end_color="FFEB9C", fill_type="solid")
 
 COLD_OUTREACH_COLUMNS = [
     ("Company", 30),
@@ -80,39 +85,48 @@ def _write_job_row(ws, row_idx: int, job: dict):
     score = job.get("match_score", 0)
     company_type = job.get("company_type", "unknown")
     salary_lpa = job.get("salary_lpa")
+    ghost_risk = job.get("ghost_risk", "low")
+    injected = ", ".join(job.get("core_competencies", []))
 
     values = [
-        job.get("title", ""),
-        job.get("company", ""),
-        company_type.title(),
-        job.get("location", ""),
-        job.get("salary", ""),
-        f"{salary_lpa} LPA" if salary_lpa else "Not disclosed",
-        job.get("experience", ""),
-        job.get("job_type", ""),
-        job.get("posted_date", ""),
-        job.get("source", ""),
-        score,
-        job.get("recommendation", ""),
-        job.get("reason", ""),
-        ", ".join(job.get("matched_keywords", [])),
-        ", ".join(job.get("missing_keywords", [])),
-        job.get("url", ""),
-        job.get("tailored_pdf_path", ""),
+        job.get("title", ""),                               # 1
+        job.get("company", ""),                              # 2
+        company_type.title(),                                # 3
+        job.get("location", ""),                             # 4
+        score,                                               # 5
+        job.get("recommendation", ""),                       # 6
+        job.get("reason", ""),                               # 7
+        ghost_risk.title(),                                  # 8
+        job.get("salary", ""),                               # 9
+        f"{salary_lpa} LPA" if salary_lpa else "Not disclosed",  # 10
+        job.get("experience", ""),                           # 11
+        job.get("job_type", ""),                             # 12
+        job.get("posted_date", ""),                          # 13
+        job.get("source", ""),                               # 14
+        ", ".join(job.get("matched_keywords", [])),          # 15
+        ", ".join(job.get("missing_keywords", [])),          # 16
+        injected,                                            # 17
+        job.get("url", ""),                                  # 18
+        job.get("tailored_pdf_path", ""),                    # 19
     ]
     for col, val in enumerate(values, 1):
         cell = ws.cell(row=row_idx, column=col, value=val)
-        # Color based on score
         cell.fill = _score_fill(score)
-        # Product companies get highlighted
+        # Company type highlight
         if col == 3:
             if company_type == "product":
                 cell.font = PRODUCT_FONT
                 cell.fill = BLUE_FILL
             elif company_type == "service":
                 cell.font = SERVICE_FONT
-        # Make URL clickable
-        if col == 16 and val:
+        # Ghost risk coloring
+        if col == 8:
+            if ghost_risk == "high":
+                cell.fill = GHOST_HIGH_FILL
+            elif ghost_risk == "medium":
+                cell.fill = GHOST_MED_FILL
+        # URL clickable
+        if col == 18 and val:
             cell.hyperlink = val
             cell.font = LINK_FONT
 
