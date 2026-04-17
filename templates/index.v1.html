@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Job Pipeline</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body data-has-results="{{ 'true' if has_results else 'false' }}">
+
+  <!-- Header -->
+  <header class="header">
+    <h1>AI Job Pipeline</h1>
+    <div class="header-actions">
+      <a href="https://github.com/parth-r-parmar/ai-job-pipeline" target="_blank">GitHub</a>
+    </div>
+  </header>
+
+  <div class="container">
+
+    <!-- Form -->
+    <div class="form-section">
+      <div class="form-row">
+        <div class="form-group flex-grow">
+          <label>Keywords</label>
+          <input type="text" id="keywords" placeholder="{{ auto_keywords }}" value="">
+        </div>
+        <div class="form-group">
+          <label>Location</label>
+          <select id="location">
+            <option value="India" selected>India</option>
+            <option value="Gujarat">Gujarat</option>
+            <option value="Bangalore">Bangalore</option>
+            <option value="Mumbai">Mumbai</option>
+            <option value="Delhi">Delhi</option>
+            <option value="Pune">Pune</option>
+            <option value="Hyderabad">Hyderabad</option>
+            <option value="Remote">Remote (Worldwide)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Pages</label>
+          <input type="number" id="pages" value="2" min="1" max="10" style="width:65px">
+        </div>
+        <div class="form-group">
+          <button class="btn-run" onclick="runPipeline()">&#9654; Run</button>
+        </div>
+        <div class="form-group">
+          <button class="btn-demo" onclick="runPipeline(true)">Demo</button>
+        </div>
+      </div>
+
+      <!-- Advanced Toggle -->
+      <div class="advanced-toggle" onclick="toggleAdvanced()">
+        <span class="arrow">&#9656;</span> Advanced Settings
+      </div>
+
+      <div class="advanced-section">
+        <div class="advanced-grid">
+          <!-- Scrapers -->
+          <div class="form-group">
+            <label>Scrapers</label>
+            <div class="checkbox-group">
+              <label class="checkbox-label"><input type="checkbox" name="scrapers" value="linkedin" checked> LinkedIn</label>
+              <label class="checkbox-label"><input type="checkbox" name="scrapers" value="internshala" checked> Internshala</label>
+              <label class="checkbox-label"><input type="checkbox" name="scrapers" value="naukri"> Naukri</label>
+              <label class="checkbox-label"><input type="checkbox" name="scrapers" value="indeed"> Indeed</label>
+            </div>
+          </div>
+
+          <!-- Scorer -->
+          <div class="form-group">
+            <label>Scorer</label>
+            <div class="radio-group">
+              <label class="radio-label"><input type="radio" name="scorer" value="none"> None</label>
+              <label class="radio-label"><input type="radio" name="scorer" value="api"> API</label>
+              <label class="radio-label"><input type="radio" name="scorer" value="cli" checked> CLI</label>
+            </div>
+          </div>
+
+          <!-- PDF Style -->
+          <div class="form-group">
+            <label>PDF Style</label>
+            <div class="radio-group">
+              <label class="radio-label"><input type="radio" name="pdf_style" value="classic"> Classic</label>
+              <label class="radio-label"><input type="radio" name="pdf_style" value="modern" checked> Modern</label>
+              <label class="radio-label"><input type="radio" name="pdf_style" value="both"> Both</label>
+            </div>
+          </div>
+
+          <!-- Min Salary -->
+          <div class="form-group">
+            <label>Min Salary (LPA)</label>
+            <input type="number" id="min_salary" value="8" min="0" max="100" style="width:80px">
+          </div>
+
+          <!-- Match Threshold -->
+          <div class="form-group">
+            <label>Match Threshold</label>
+            <input type="number" id="threshold" value="70" min="0" max="100" style="width:80px">
+          </div>
+
+          <!-- Checkboxes -->
+          <div class="form-group">
+            <label>Options</label>
+            <div class="checkbox-group" style="flex-direction:column">
+              <label class="checkbox-label"><input type="checkbox" id="include_remote" checked> Include Remote</label>
+              <label class="checkbox-label"><input type="checkbox" id="force"> Force Re-process</label>
+              <label class="checkbox-label"><input type="checkbox" id="dry_run"> Dry Run (no tailoring)</label>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Progress -->
+    <div class="progress-section">
+      <div class="progress-header">
+        <span class="progress-phase">Starting...</span>
+        <span class="progress-counter"></span>
+      </div>
+      <div class="progress-log"></div>
+    </div>
+
+    <!-- Stats Bar -->
+    <div class="stats-bar" style="display:none"></div>
+
+    <!-- Results: Table (Desktop) -->
+    <div class="results-table-wrapper"></div>
+
+    <!-- Results: Cards (Mobile) -->
+    <div class="results-cards"></div>
+
+    <!-- Placeholder -->
+    {% if not has_results %}
+    <div class="placeholder-msg">
+      <div class="icon">&#128269;</div>
+      <div>Run the pipeline to find and score jobs.</div>
+      <div style="font-size:13px;margin-top:4px">Or click <strong>Demo</strong> to see sample output instantly.</div>
+    </div>
+    {% endif %}
+
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>

@@ -31,3 +31,14 @@ tailored_resumes/
 .DS_Store
 Thumbs.db
 .superpowers/
+
+# Local working assets (not checked in)
+.obsidian/
+CLAUDE.md
+claude-memory-compiler/
+design_handoff_autoapply_dashboard/
+.playwright-mcp/
+
+# Screenshots: ignore local drafts but keep release assets in polish-v2/
+screenshots/*
+!screenshots/polish-v2/

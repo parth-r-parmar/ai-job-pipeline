@@ -3,144 +3,287 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AI Job Pipeline</title>
+  <meta name="color-scheme" content="dark light">
+  <title>Ai Job Pipeline</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='5' fill='%230f1117'/%3E%3Cpath d='M13 2L4 14h6l-1 8 9-12h-6l1-8z' fill='%23ffd166'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <!-- FOUC prevention: apply persisted theme before stylesheet loads -->
+  <script>try{var t=localStorage.getItem('aijp-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.classList.add('light');}else if(t==='dark'){document.documentElement.setAttribute('data-theme','dark');}}catch(e){}</script>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,300..700,0..1,-50..200" rel="stylesheet">
   <link rel="stylesheet" href="/static/style.css">
 </head>
 <body data-has-results="{{ 'true' if has_results else 'false' }}">
 
-  <!-- Header -->
-  <header class="header">
-    <h1>AI Job Pipeline</h1>
-    <div class="header-actions">
-      <a href="https://github.com/parth-r-parmar/ai-job-pipeline" target="_blank">GitHub</a>
+  <!-- SVG icon sprite. Referenced via <use href="#icon-…"/>. Required by tests. -->
+  <svg xmlns="http://www.w3.org/2000/svg" style="position:absolute;width:0;height:0;overflow:hidden" aria-hidden="true">
+    <defs>
+      <symbol id="icon-chevron-right" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></symbol>
+      <symbol id="icon-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></symbol>
+      <symbol id="icon-settings" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></symbol>
+      <symbol id="icon-spreadsheet" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M9 9v12"/></symbol>
+      <symbol id="icon-package" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16.5 9.4 7.55 4.24"/><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></symbol>
+      <symbol id="icon-file-text" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></symbol>
+      <symbol id="icon-alert-triangle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></symbol>
+      <symbol id="icon-play" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="6 3 20 12 6 21 6 3"/></symbol>
+      <symbol id="icon-copy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></symbol>
+      <symbol id="icon-external-link" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></symbol>
+    </defs>
+  </svg>
+
+  <!-- Accessibility: skip link + aria live region -->
+  <a href="#main" class="skip-link">Skip to main content</a>
+  <div class="sr-only" aria-live="polite" id="result-announcer"></div>
+
+  <!-- Floating glass header -->
+  <header class="v3-header" role="banner">
+    <div class="v3-header-left">
+      <button class="v3-icon-btn" id="sidebar-toggle" onclick="toggleSidebar()" aria-label="Toggle settings panel" title="Show settings">
+        <span class="material-symbols-outlined">tune</span>
+      </button>
+      <div class="v3-logo">
+        <span class="material-symbols-outlined" style="font-size:22px;color:var(--accent)">bolt</span>
+        <span class="v3-logo-text">Ai Job Pipeline</span>
+      </div>
+    </div>
+    <div class="v3-header-right">
+      <button class="v3-icon-btn" id="discreet-toggle" onclick="toggleDiscreet()" aria-label="Toggle discreet mode" title="Discreet mode">
+        <span class="material-symbols-outlined">visibility</span>
+      </button>
+      <button class="theme-toggle" type="button" aria-label="Cycle theme (auto, light, dark)">
+        <svg class="icon icon-auto" viewBox="0 0 24 24" aria-hidden="true">
+          <circle cx="12" cy="12" r="9"/>
+          <path d="M12 3v18"/>
+          <path d="M12 3a9 9 0 0 0 0 18" fill="currentColor" opacity="0.35"/>
+        </svg>
+        <svg class="icon icon-light" viewBox="0 0 24 24" aria-hidden="true">
+          <circle cx="12" cy="12" r="4"/>
+          <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/>
+        </svg>
+        <svg class="icon icon-dark" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+        </svg>
+      </button>
+      <a href="https://github.com/parth-r-parmar/ai-job-pipeline" target="_blank" rel="noopener noreferrer" class="v3-icon-btn" aria-label="GitHub repository" title="GitHub">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222 0 1.606-.015 2.898-.015 3.293 0 .322.216.694.825.576 4.765-1.587 8.199-6.084 8.199-11.386 0-6.627-5.373-12-12-12"/></svg>
+      </a>
     </div>
   </header>
 
-  <div class="container">
+  <!-- Backdrop overlay — always in DOM; visibility toggled via .visible class -->
+  <div class="v3-backdrop" id="v3-backdrop" onclick="toggleSidebar()" aria-hidden="true"></div>
 
-    <!-- Form -->
-    <div class="form-section">
-      <div class="form-row">
-        <div class="form-group flex-grow">
-          <label>Keywords</label>
-          <input type="text" id="keywords" placeholder="{{ auto_keywords }}" value="">
-        </div>
-        <div class="form-group">
-          <label>Location</label>
-          <select id="location">
-            <option value="India" selected>India</option>
-            <option value="Gujarat">Gujarat</option>
-            <option value="Bangalore">Bangalore</option>
-            <option value="Mumbai">Mumbai</option>
-            <option value="Delhi">Delhi</option>
-            <option value="Pune">Pune</option>
-            <option value="Hyderabad">Hyderabad</option>
-            <option value="Remote">Remote (Worldwide)</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>Pages</label>
-          <input type="number" id="pages" value="2" min="1" max="10" style="width:65px">
-        </div>
-        <div class="form-group">
-          <button class="btn-run" onclick="runPipeline()">&#9654; Run</button>
-        </div>
-        <div class="form-group">
-          <button class="btn-demo" onclick="runPipeline(true)">Demo</button>
-        </div>
-      </div>
-
-      <!-- Advanced Toggle -->
-      <div class="advanced-toggle" onclick="toggleAdvanced()">
-        <span class="arrow">&#9656;</span> Advanced Settings
-      </div>
-
-      <div class="advanced-section">
-        <div class="advanced-grid">
-          <!-- Scrapers -->
-          <div class="form-group">
-            <label>Scrapers</label>
-            <div class="checkbox-group">
-              <label class="checkbox-label"><input type="checkbox" name="scrapers" value="linkedin" checked> LinkedIn</label>
-              <label class="checkbox-label"><input type="checkbox" name="scrapers" value="internshala" checked> Internshala</label>
-              <label class="checkbox-label"><input type="checkbox" name="scrapers" value="naukri"> Naukri</label>
-              <label class="checkbox-label"><input type="checkbox" name="scrapers" value="indeed"> Indeed</label>
-            </div>
-          </div>
-
-          <!-- Scorer -->
-          <div class="form-group">
-            <label>Scorer</label>
-            <div class="radio-group">
-              <label class="radio-label"><input type="radio" name="scorer" value="none"> None</label>
-              <label class="radio-label"><input type="radio" name="scorer" value="api"> API</label>
-              <label class="radio-label"><input type="radio" name="scorer" value="cli" checked> CLI</label>
-            </div>
-          </div>
-
-          <!-- PDF Style -->
-          <div class="form-group">
-            <label>PDF Style</label>
-            <div class="radio-group">
-              <label class="radio-label"><input type="radio" name="pdf_style" value="classic"> Classic</label>
-              <label class="radio-label"><input type="radio" name="pdf_style" value="modern" checked> Modern</label>
-              <label class="radio-label"><input type="radio" name="pdf_style" value="both"> Both</label>
-            </div>
-          </div>
-
-          <!-- Min Salary -->
-          <div class="form-group">
-            <label>Min Salary (LPA)</label>
-            <input type="number" id="min_salary" value="8" min="0" max="100" style="width:80px">
-          </div>
-
-          <!-- Match Threshold -->
-          <div class="form-group">
-            <label>Match Threshold</label>
-            <input type="number" id="threshold" value="70" min="0" max="100" style="width:80px">
-          </div>
-
-          <!-- Checkboxes -->
-          <div class="form-group">
-            <label>Options</label>
-            <div class="checkbox-group" style="flex-direction:column">
-              <label class="checkbox-label"><input type="checkbox" id="include_remote" checked> Include Remote</label>
-              <label class="checkbox-label"><input type="checkbox" id="force"> Force Re-process</label>
-              <label class="checkbox-label"><input type="checkbox" id="dry_run"> Dry Run (no tailoring)</label>
-            </div>
-          </div>
-        </div>
-      </div>
+  <!-- Floating glass sidebar (slides in from left) -->
+  <aside class="v3-sidebar" id="config-sidebar" aria-label="Pipeline configuration">
+    <div class="v3-sb-header">
+      <span class="v3-sb-title">Configuration</span>
+      <button class="v3-icon-btn v3-sb-close" onclick="toggleSidebar()" aria-label="Collapse sidebar" title="Collapse sidebar">
+        <span class="material-symbols-outlined">keyboard_double_arrow_left</span>
+      </button>
     </div>
+
+    <div class="v3-sb-body form-section">
+
+      <!-- Missing-resume banner -->
+      <div class="banner" id="resume-banner" hidden role="alert">
+        <svg class="icon" aria-hidden="true"><use href="#icon-alert-triangle"/></svg>
+        <span id="resume-banner-msg">No <code>resume.json</code> found. Copy <code>examples/resume.example.json</code> and edit with your details to get started.</span>
+        <button type="button" class="banner__dismiss" onclick="dismissResumeBanner()" aria-label="Dismiss banner">&times;</button>
+      </div>
+
+      <!-- Inline warnings (force-reprocess, missing API key, etc.) -->
+      <div class="inline-warning" id="inline-warning" hidden role="status"></div>
+
+      <!-- Keywords -->
+      <div class="fg">
+        <label class="fg-label" for="keywords">Keywords</label>
+        <input class="v3-input" type="text" id="keywords" placeholder="{{ auto_keywords }}" value="">
+      </div>
+
+      <!-- Location — freeform input + datalist autocomplete -->
+      <div class="fg">
+        <label class="fg-label" for="location">Location</label>
+        <input type="text" id="location" list="locations" class="v3-input" value="India" placeholder="Any location or 'Remote'" autocomplete="off">
+        <datalist id="locations">
+          <option value="India">
+          <option value="Remote">
+          <option value="Bangalore">
+          <option value="Mumbai">
+          <option value="Delhi">
+          <option value="Pune">
+          <option value="Hyderabad">
+          <option value="Gujarat">
+          <option value="Chennai">
+          <option value="Kolkata">
+          <option value="Ahmedabad">
+          <option value="Noida">
+          <option value="Gurgaon">
+        </datalist>
+      </div>
+
+      <!-- Pages + Min Salary -->
+      <div class="v3-row-2">
+        <div class="fg">
+          <label class="fg-label" for="pages">Pages / site</label>
+          <input class="v3-input" type="number" id="pages" value="2" min="1" max="10">
+        </div>
+        <div class="fg">
+          <label class="fg-label" for="min_salary">Min Salary (LPA)</label>
+          <input class="v3-input" type="number" id="min_salary" value="8" min="0" max="100">
+        </div>
+      </div>
+
+      <!-- Sources: chip select (name="scrapers" checkboxes are hidden; .chip-opt labels are visible) -->
+      <div class="fg">
+        <label class="fg-label">Sources</label>
+        <div class="chip-select" data-chip-group="scrapers">
+          <label class="chip-opt active"><input type="checkbox" name="scrapers" value="linkedin" checked> LinkedIn</label>
+          <label class="chip-opt active"><input type="checkbox" name="scrapers" value="internshala" checked> Internshala</label>
+          <label class="chip-opt"><input type="checkbox" name="scrapers" value="naukri"> Naukri</label>
+          <label class="chip-opt"><input type="checkbox" name="scrapers" value="indeed"> Indeed</label>
+        </div>
+      </div>
+
+      <!-- CLI preview — MUST appear BEFORE .advanced-toggle -->
+      <details class="command-preview">
+        <summary>
+          <svg class="icon chevron" aria-hidden="true"><use href="#icon-chevron-right"/></svg>
+          Show CLI equivalent
+        </summary>
+        <div class="command-preview__body">
+          <pre><code id="cli-preview">python -m src.main</code></pre>
+          <button type="button" class="btn-copy" onclick="copyCLI()" aria-label="Copy command">
+            <svg class="icon" aria-hidden="true"><use href="#icon-copy"/></svg>
+            <span class="btn-copy__label">Copy</span>
+          </button>
+        </div>
+      </details>
+
+      <!-- Advanced Settings disclosure -->
+      <button type="button" class="advanced-toggle" onclick="toggleAdvanced()" aria-expanded="false" aria-controls="advanced-panel">
+        <svg class="icon chevron" aria-hidden="true"><use href="#icon-chevron-right"/></svg>
+        Advanced Settings
+      </button>
+
+      <div class="advanced-section" id="advanced-panel">
+
+        <!-- Scorer — segmented control -->
+        <div class="fg">
+          <label class="fg-label">Scorer</label>
+          <div class="seg-wrap" data-seg-group="scorer">
+            <div class="seg-track">
+              <span class="seg-thumb"></span>
+              <button type="button" class="seg-btn" data-value="none">None</button>
+              <button type="button" class="seg-btn" data-value="api">API</button>
+              <button type="button" class="seg-btn active" data-value="cli">CLI</button>
+            </div>
+            <!-- Hidden radios backing the segmented buttons (read by runPipeline + buildCLI) -->
+            <input type="radio" name="scorer" value="none" hidden>
+            <input type="radio" name="scorer" value="api" hidden>
+            <input type="radio" name="scorer" value="cli" checked hidden>
+          </div>
+        </div>
+
+        <!-- PDF Style — segmented control, Classic is default -->
+        <div class="fg">
+          <label class="fg-label">PDF Style</label>
+          <div class="seg-wrap" data-seg-group="pdf_style">
+            <div class="seg-track">
+              <span class="seg-thumb"></span>
+              <button type="button" class="seg-btn active" data-value="classic">Classic</button>
+              <button type="button" class="seg-btn" data-value="modern">Modern</button>
+              <button type="button" class="seg-btn" data-value="both">Both</button>
+            </div>
+            <input type="radio" name="pdf_style" value="classic" checked hidden>
+            <input type="radio" name="pdf_style" value="modern" hidden>
+            <input type="radio" name="pdf_style" value="both" hidden>
+          </div>
+        </div>
+
+        <!-- Match Threshold -->
+        <div class="fg">
+          <label class="fg-label" for="threshold">Match Threshold</label>
+          <input class="v3-input" type="number" id="threshold" value="70" min="0" max="100">
+        </div>
+
+        <!-- Toggle switches -->
+        <label class="toggle-row">
+          <span class="toggle-label">Include Remote</span>
+          <input type="checkbox" id="include_remote" checked>
+          <span class="toggle-track on"><span class="toggle-knob"></span></span>
+        </label>
+        <label class="toggle-row">
+          <span class="toggle-label">Force Re-process</span>
+          <input type="checkbox" id="force">
+          <span class="toggle-track"><span class="toggle-knob"></span></span>
+        </label>
+        <label class="toggle-row">
+          <span class="toggle-label">Dry Run</span>
+          <input type="checkbox" id="dry_run">
+          <span class="toggle-track"><span class="toggle-knob"></span></span>
+        </label>
+
+      </div>
+
+    </div>
+
+    <!-- Sidebar footer — Run + Demo -->
+    <div class="v3-sb-footer">
+      <button class="v3-btn-primary" id="btn-run" onclick="runPipeline()" aria-label="Run pipeline with current settings">
+        <svg class="icon" aria-hidden="true"><use href="#icon-play"/></svg>
+        Run Pipeline
+      </button>
+      <button class="v3-btn-ghost mobile-hide" id="btn-demo" onclick="runPipeline(true)" aria-label="Run demo with sample jobs">Load Demo</button>
+    </div>
+  </aside>
+
+  <!-- Main content -->
+  <main id="main" class="v3-main" role="main">
 
     <!-- Progress -->
-    <div class="progress-section">
+    <div class="progress-section" role="region" aria-label="Pipeline progress log">
       <div class="progress-header">
-        <span class="progress-phase">Starting...</span>
+        <span class="progress-phase"><span class="v3-spinner"></span>Starting...</span>
         <span class="progress-counter"></span>
       </div>
-      <div class="progress-log"></div>
+      <div class="progress-log" aria-live="polite" aria-atomic="false"></div>
     </div>
 
-    <!-- Stats Bar -->
-    <div class="stats-bar" style="display:none"></div>
+    <!-- Stats Bar (pills) -->
+    <div class="stats-bar v3-stats" role="region" aria-label="Results summary"></div>
 
-    <!-- Results: Table (Desktop) -->
+    <!-- Results table wrapper (hidden, kept for sortTable compat) -->
     <div class="results-table-wrapper"></div>
 
-    <!-- Results: Cards (Mobile) -->
-    <div class="results-cards"></div>
+    <!-- Results header (title + count + sort pills — rendered by JS) -->
+    <div class="results-header v3-results-header" id="results-header" hidden></div>
 
-    <!-- Placeholder -->
+    <!-- Results: Expandable v3-job-row cards -->
+    <div class="results-cards v3-job-list"></div>
+
+    <!-- Placeholder / empty state -->
     {% if not has_results %}
-    <div class="placeholder-msg">
-      <div class="icon">&#128269;</div>
-      <div>Run the pipeline to find and score jobs.</div>
-      <div style="font-size:13px;margin-top:4px">Or click <strong>Demo</strong> to see sample output instantly.</div>
+    <div class="placeholder-msg v3-empty">
+      <span class="material-symbols-outlined">rocket_launch</span>
+      <div class="v3-empty-title">Ready to search</div>
+      <div class="v3-empty-sub">Open settings (top-left) to configure your search, then hit <strong>Run Pipeline</strong>. Or try <strong>Load Demo</strong> for sample output.</div>
     </div>
     {% endif %}
 
-  </div>
+  </main>
+
+  <!-- Bottom tab bar (mobile only) — Results / Settings -->
+  <nav class="tab-bar" role="navigation" aria-label="Mobile sections">
+    <button class="tab-item" data-tab="results">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><circle cx="3" cy="6" r="1"/><circle cx="3" cy="12" r="1"/><circle cx="3" cy="18" r="1"/></svg>
+      <span>Results</span>
+    </button>
+    <button class="tab-item" data-tab="settings">
+      <svg aria-hidden="true"><use href="#icon-settings"/></svg>
+      <span>Settings</span>
+    </button>
+  </nav>
 
   <script src="/static/app.js"></script>
 </body>

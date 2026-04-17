@@ -1,5 +1,5 @@
 """
-AI Job Pipeline — Web GUI
+Ai Job Pipeline — Web GUI
 
 Run: python app.py
 Opens: http://localhost:5000
@@ -324,7 +324,23 @@ def download_all():
 
 @app.route("/status")
 def status():
-    return jsonify({"running": _pipeline_running})
+    """Pipeline-running flag + environment probes for friction hints."""
+    return jsonify({
+        "running": _pipeline_running,
+        # Tell the GUI whether an Anthropic key is set so it can warn before a
+        # doomed run with scorer=api. The actual key is not returned.
+        "api_key_set": bool(ANTHROPIC_API_KEY),
+    })
+
+
+@app.route("/resume/exists")
+def resume_exists():
+    """Used by the GUI to surface an onboarding banner when resume.json is missing.
+    Path is canonicalised (resolves `..` segments) so the banner shows the real
+    filesystem location the GUI checked, not the raw env-var value."""
+    from src.config import RESUME_PATH
+    resolved = str(Path(RESUME_PATH).resolve())
+    return jsonify({"ok": os.path.exists(resolved), "path": resolved})
 
 
 # ---------------------------------------------------------------------------
@@ -333,7 +349,7 @@ def status():
 
 if __name__ == "__main__":
     port = 5000
-    print(f"\n  AI Job Pipeline — Web GUI")
+    print(f"\n  Ai Job Pipeline — Web GUI")
     print(f"  Open: http://localhost:{port}\n")
     webbrowser.open(f"http://localhost:{port}")
     app.run(host="0.0.0.0", port=port, debug=False, threaded=True)
