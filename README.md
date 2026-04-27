@@ -1,318 +1,286 @@
 # AI Job Pipeline
 
-An AI-powered job search automation tool that scrapes jobs from multiple portals, scores them against your resume, tailors your resume per job with JD keyword injection, detects ghost postings, and exports everything to a formatted Excel workbook.
+**Stop retyping your resume for every job application.** This tool scrapes job portals, scores each posting against your resume with Claude AI, and generates a tailored resume PDF for every strong match — all in one click (or one command). Runs locally on your laptop, MIT licensed, no account needed.
 
-## Features
+Built for job seekers who apply to 10+ roles a week and are tired of the copy-paste grind. Especially handy in the Indian market — parses LPA salaries, flags product vs service companies (Razorpay, CRED, Swiggy etc.), and has a curated cold-outreach list built in.
 
-- **Multi-site scraping** — LinkedIn, Internshala, Naukri, Indeed (rotating user-agents, rate limiting)
-- **Full JD fetching** — Fetches detailed descriptions from job detail pages for better scoring
-- **Ghost job detection** — Flags suspicious postings (high/medium/low risk) using Python heuristics — no AI needed
-- **Smart filtering** — Salary threshold, internship exclusion, product vs service company detection
-- **AI-powered scoring** — Claude evaluates job-resume match (0-100) with matched/missing keywords
-- **JD keyword injection** — Tailoring rewrites bullets using exact JD vocabulary for ATS optimization
-- **Tailoring diff view** — Shows exactly what changed in each bullet vs your original resume
-- **Two PDF styles** — Classic (fpdf2) or Modern (HTML+Playwright with custom fonts, gradient headers, competency badges)
-- **Cross-run dedup** — Re-running reuses previous scores and skips already-tailored PDFs (saves 15-20 min)
-- **Excel export** — 4-sheet workbook with Ghost Risk, Injected Keywords, color coding, clickable links
-- **Cold outreach sheet** — 20 curated product companies with LinkedIn links and suggested actions
-- **One-click apply** — `--open-top 10` opens top job URLs in your browser
-- **Scheduled scans** — `--schedule daily` catches fresh postings before others apply
-- **Demo mode** — `--demo` shows full output in under 1 second with sample data (no scraping/AI)
-- **Remote job search** — Automatically searches for remote opportunities worldwide
-- **No API key required** — Scraping, filtering, ghost detection, and export work without any key
+---
 
-## Quick Start
+## Table of contents
+
+- [What you get](#what-you-get)
+- [Quick start — Web GUI](#quick-start--web-gui) *(recommended for most people)*
+- [Quick start — CLI](#quick-start--cli) *(for power users)*
+- [Screenshots](#screenshots)
+- [Configuration](#configuration)
+- [How it works](#how-it-works)
+- [How this compares to alternatives](#how-this-compares-to-alternatives)
+- [GUI vs CLI feature matrix](#gui-vs-cli-feature-matrix)
+- [CLI usage examples](#cli-usage-examples)
+- [Full CLI flag reference](#full-cli-flag-reference)
+- [Development](#development)
+- [Known limitations](#known-limitations)
+- [License](#license)
+
+---
+
+## What you get
+
+- **Finds** matching jobs across LinkedIn, Internshala, Naukri, and Indeed
+- **Scores** every job 0–100 against your resume and lists the keywords you're missing
+- **Tailors** your resume PDF per strong-match job — with a validator that blocks the AI from inventing skills you don't have
+- **Exports** everything to an Excel workbook (sorted, colour-coded, Cold Outreach sheet included)
+- **Detects ghost postings** using Python heuristics (no AI for this one, just pattern matching)
+
+> **What this is NOT:** a recruiter service, a paid SaaS, or an account-based tool. Everything runs on your machine. The only external call is to Claude AI, using your key (or your Claude Code CLI login).
+
+---
+
+## Quick start — Web GUI
 
 ```bash
-# 1. Clone
 git clone https://github.com/parth-r-parmar/ai-job-pipeline.git
 cd ai-job-pipeline
-
-# 2. Install
 pip install -r requirements.txt
-
-# 3. Try the demo (no setup needed)
-python -m src.main --demo
-
-# 4. Edit resume.json with your data, then run for real
-python -m src.main --keywords "React Developer" --location "India" --pages 2 --dry-run
+python app.py
 ```
 
-Your results will be in `output/jobs.xlsx`.
+Your browser opens at `http://localhost:5000`. Click **Demo** to see sample output in under 1 second. When you're ready to run for real, edit `resume.json` with your details, put your Anthropic API key in `.env` (or install [Claude Code](https://claude.com/claude-code) to run with no key), then click **Run**.
+
+**GUI highlights**
+
+- Live progress log (phases, counters, ETA)
+- Dark / light mode with a cycling toggle; follows your OS by default
+- Mobile-friendly — check results from your phone during standups
+- "Open top N in tabs" button after a run — one click, ten applications open in new browser tabs
+- **Discreet mode** (`Esc Esc`) swaps the tab title to "Quarterly Report — Google Sheets" for moments when you're at the office
+- CLI equivalent preview below the form — tweak the UI, copy the exact terminal command, run it anywhere
+
+---
+
+## Quick start — CLI
+
+```bash
+# See it work instantly (no API key, no scraping)
+python -m src.main --demo
+
+# First real run — scrape + score, skip the tailoring pass
+python -m src.main --keywords "React Developer" --location "India" --dry-run
+
+# Full run — scrape → score → tailor top matches → open top 10 URLs
+python -m src.main --keywords "React Developer" --location "India" --open-top 10
+```
+
+Results land in `output/jobs.xlsx` plus `output/tailored_resumes/*.pdf` for every job scoring ≥ your threshold.
+
+---
+
+## Screenshots
+
+| Dark (desktop) | Light (desktop) | Mobile |
+|----------------|-----------------|--------|
+| [1440-dark](screenshots/polish-v2/1440-dark.png) | [1440-light](screenshots/polish-v2/1440-light.png) | [375-dark](screenshots/polish-v2/375-dark.png) |
+
+(See `screenshots/polish-v2/` for full-page captures at every breakpoint.)
+
+---
 
 ## Configuration
 
-Copy `.env.example` to `.env` and customize:
+### `.env` — copy and edit
 
 ```bash
 cp .env.example .env
 ```
 
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `ANTHROPIC_API_KEY` | _(empty)_ | Claude API key for scoring/tailoring. Get from [console.anthropic.com](https://console.anthropic.com) |
-| `MIN_SALARY_LPA` | `8` | Filter out jobs below this salary (Lakhs Per Annum) |
-| `MATCH_THRESHOLD` | `70` | Jobs scoring above this get tailored resumes |
-| `PAGES_PER_SITE` | `3` | Pages to scrape per job site |
-| `PDF_STYLE` | `classic` | Default PDF style: `classic`, `modern`, or `both` |
-| `MAX_DETAIL_FETCHES` | `20` | Max job detail pages to fetch per scraper |
+| Variable | Default | What it does |
+|----------|---------|--------------|
+| `ANTHROPIC_API_KEY` | *(empty)* | Your Claude API key. Leave empty if you use `--scorer cli` and have Claude Code installed — no key needed. |
+| `MIN_SALARY_LPA` | `8` | Drops jobs below this salary (in Lakhs Per Annum) |
+| `MATCH_THRESHOLD` | `70` | Jobs scoring ≥ this get a tailored resume PDF |
+| `PAGES_PER_SITE` | `3` | How many pages to scrape per job site |
+| `PDF_STYLE` | `classic` | `classic` (default, no extra deps), `modern` (needs Playwright), or `both` |
+| `MAX_DETAIL_FETCHES` | `20` | Max detail pages to fetch per scraper |
+| `RESUME_PATH` | `resume.json` | Path to your resume JSON (supports absolute paths for shared/private setups) |
 
-## Usage
+### `resume.json` — your profile as data
 
-### Demo (try it in 1 second, no setup)
-```bash
-python -m src.main --demo
-```
-
-### Basic (scrape + filter + export)
-```bash
-python -m src.main --keywords "React Developer" --location "India"
-```
-
-### With AI scoring (needs API key or Claude Code CLI)
-```bash
-# Using Anthropic API key (set in .env)
-python -m src.main --keywords "React Developer" --location "India"
-
-# Using Claude Code CLI (no API key needed, uses your login)
-python -m src.main --scorer cli --keywords "React Developer" --location "India"
-```
-
-### Dry run (scrape + score, skip tailoring)
-```bash
-python -m src.main --dry-run --keywords "Full Stack Developer"
-```
-
-### Modern PDFs
-```bash
-pip install playwright && playwright install chromium
-python -m src.main --pdf-style modern
-```
-
-### One-click apply
-```bash
-python -m src.main --open-top 10    # opens top 10 job URLs in browser
-```
-
-### Schedule daily scans
-```bash
-python -m src.main --schedule daily --keywords "React Developer" --location "India"
-python -m src.main --schedule off       # remove scheduled task
-```
-
-### Force re-process (ignore cached scores)
-```bash
-python -m src.main --force    # re-scores and re-tailors everything from scratch
-```
-
-### Generate a general resume (no JD needed)
-```bash
-python gen_general_resume.py    # uses resume.json, outputs to output/
-```
-
-### All CLI flags
-```
-python -m src.main [-h]
-  --keywords / -k       Search keywords (default: auto from resume)
-  --location / -l       Job location (default: India)
-  --pages / -p          Pages per site (default: 3)
-  --dry-run             Scrape + score only, skip tailoring
-  --output / -o         Output Excel path (default: output/jobs.xlsx)
-  --scrapers / -s       Specific scrapers: naukri indeed linkedin internshala
-  --no-remote           Skip remote jobs search pass
-  --pdf-style           classic (default), modern (HTML+Playwright), or both
-  --scorer              api (needs ANTHROPIC_API_KEY) or cli (Claude Code CLI)
-  --open-top N          Open top N job URLs in browser after export
-  --schedule            Set up recurring scan: daily, weekly, or off
-  --demo                Run with sample data, no scraping or AI needed
-  --force               Ignore cached scores, re-process everything
-```
-
-## Resume Format
-
-Edit `resume.json` with your data:
+The tool scores jobs against this file. See `examples/resume.example.json` for a full template. The minimal shape:
 
 ```json
 {
   "name": "Your Name",
   "contact": {
     "phone": "+1 555-123-4567",
-    "email": "you@email.com",
-    "github": "github.com/username",
-    "linkedin": "linkedin.com/in/username",
+    "email": "you@example.com",
+    "linkedin": "linkedin.com/in/you",
     "location": "City, Country"
   },
-  "summary": "Your professional summary...",
-  "core_competencies": [
-    "React.js Architecture",
-    "Node.js Backend",
-    "TypeScript"
-  ],
-  "education": [{ "institution": "...", "location": "...", "degree": "...", "dates": "..." }],
-  "skills": { "Category": "Skill1, Skill2, Skill3" },
-  "experience": [{ "company": "...", "role": "...", "dates": "...", "bullets": ["..."] }],
-  "projects": [{ "name": "...", "link": "...", "bullets": ["..."] }]
+  "summary": "Full Stack Developer with 4+ years of experience...",
+  "core_competencies": ["React", "Node.js", "TypeScript", "..."],
+  "education": [...],
+  "skills": { "Languages": "JavaScript, Python, ...", "...": "..." },
+  "experience": [...],
+  "projects": [...]
 }
 ```
 
-The `core_competencies` field is optional — if present, renders as keyword badges in the modern PDF.
+---
 
-## Output
-
-### Excel Workbook (4 sheets)
-
-| Sheet | Contents |
-|-------|----------|
-| **All Jobs** | Every job sorted by score. Columns: Title, Company, Match Score, Recommendation, Reason, **Ghost Risk**, Salary, Matched Keywords, Missing Keywords, **Injected Keywords**, URL |
-| **Top Matches** | Jobs above threshold, product companies first |
-| **Cold Outreach** | Product companies to cold-email + 20 recommended companies with LinkedIn links |
-| **Summary** | Stats: jobs per source, salary range, company type breakdown, score distribution, skill gaps |
-
-### Tailored Resumes
-
-For each top-matching job, the pipeline generates:
-- `{Company}_{Role}.json` — tailored resume data with `core_competencies`
-- `{Company}_{Role}.pdf` — ATS-friendly PDF (classic or modern)
-- `{Company}_{Role}_diff.txt` — shows exactly what changed vs your original resume
-
-### Ghost Job Detection
-
-Every job gets a Ghost Risk flag (low/medium/high) based on:
-- Posting age (>30 days = medium, >60 = high)
-- Description quality (short/vague = higher risk)
-- Salary transparency (undisclosed + vague description = higher risk)
-- Title specificity ("Multiple Openings" = high risk)
-
-No AI needed — pure Python heuristics. Ghost risk is color-coded in the Excel (red = high, yellow = medium).
-
-### Cross-Run Deduplication
-
-Re-running the pipeline reuses results from previous runs:
-- Jobs already scored in `output/jobs.xlsx` → score is reused (saves ~13s per job)
-- Jobs already tailored in `output/tailored_resumes/` → PDF is reused (saves ~60s per job)
-- New jobs are scored and tailored normally
-- Use `--force` to ignore the cache and re-process everything
-
-## Scrapers
-
-| Site | Method | Status |
-|------|--------|--------|
-| **LinkedIn** | Guest job API (no login required) | Working |
-| **Internshala** | HTML scraping (full-time jobs only) | Working |
-| **Naukri** | JSON API + HTML fallback | Partial (API often returns 400) |
-| **Indeed** | HTML scraping | Blocked (403 — Cloudflare) |
-
-Contributions welcome for better scraping strategies — especially Playwright-based scrapers for Naukri/Indeed.
-
-## Scoring Modes
-
-### 1. Claude API (recommended for speed)
-Set `ANTHROPIC_API_KEY` in `.env`. ~2-3 seconds per job.
-
-### 2. Claude Code CLI (no API key needed)
-```bash
-python -m src.main --scorer cli
-```
-Uses your existing Claude Code login via subprocess. ~12-15 seconds per job.
-
-### 3. No scoring
-Without an API key or `--scorer cli`, the pipeline scrapes, filters, detects ghost jobs, and exports — just without AI scoring or tailoring.
-
-## How It Compares
-
-| Feature | ai-job-pipeline | Jobright | Sonara | BulkApply |
-|---------|----------------|----------|--------|-----------|
-| Open source | Yes (MIT) | No | No | No |
-| Indian market (LPA, Naukri, Internshala) | Yes | No (US only) | No (US only) | No |
-| Ghost job detection | Yes | No | No | No |
-| Resume tailoring with diff view | Yes | Partial | No | No |
-| Works without API key | Yes | No | No | No |
-| Cross-run dedup | Yes | N/A | N/A | N/A |
-| Product vs service company detection | Yes | No | No | No |
-| Cold outreach recommendations | Yes | No | No | No |
-| Bulk auto-apply | No (intentional — quality > quantity) | Yes | Yes | Yes |
-| Price | Free | $30+/mo | $20+/mo | $10+/mo |
-
-## Project Structure
+## How it works
 
 ```
-ai-job-pipeline/
-├── README.md
-├── LICENSE
-├── requirements.txt
-├── setup.py
-├── .env.example
-├── .gitignore
-├── resume.json                 # YOUR resume (edit this)
-├── gen_general_resume.py       # Generate a general-purpose PDF
-├── examples/
-│   └── sample_jobs.json        # Sample data for --demo mode
-├── src/
-│   ├── __init__.py
-│   ├── config.py               # .env loader + defaults
-│   ├── resume_parser.py        # Extracts keywords from resume
-│   ├── filters.py              # Salary, internship, company filters
-│   ├── ghost_detector.py       # Ghost job risk detection
-│   ├── scorer.py               # Claude API scoring
-│   ├── scorer_cli.py           # Claude Code CLI scoring
-│   ├── tailor.py               # Resume tailoring + diff + PDF
-│   ├── tailor_cli.py           # CLI-based tailoring
-│   ├── exporter.py             # Excel export (4 sheets)
-│   ├── scheduler.py            # Cron / Task Scheduler setup
-│   ├── main.py                 # CLI entry point
-│   ├── resume_builder/
-│   │   ├── build_resume.py     # Classic PDF (fpdf2)
-│   │   ├── html_resume.py      # Modern PDF (HTML+Playwright)
-│   │   ├── fonts/              # Space Grotesk + DM Sans
-│   │   └── templates/          # HTML template
-│   └── scrapers/
-│       ├── base.py             # Abstract scraper with UA rotation
-│       ├── naukri.py
-│       ├── indeed.py
-│       ├── linkedin.py
-│       └── internshala.py
-└── output/                     # Generated at runtime
-    ├── jobs.xlsx
-    └── tailored_resumes/
+┌──────────┐    ┌─────────┐    ┌──────────┐    ┌──────────┐    ┌─────────┐    ┌────────┐
+│  Scrape  │ →  │ Filter  │ →  │  Ghost   │ →  │  Score   │ →  │ Tailor  │ →  │ Export │
+│ LinkedIn │    │ salary  │    │ detection│    │  Claude  │    │ resume  │    │  Excel │
+│ Intern…  │    │ intern. │    │heuristic │    │  0-100   │    │  + PDF  │    │ + PDF  │
+└──────────┘    └─────────┘    └──────────┘    └──────────┘    └─────────┘    └────────┘
 ```
 
-## Adding a New Scraper
+Each stage is a module under `src/`. The Flask web GUI (`app.py`) wraps the same pipeline and streams progress over Server-Sent Events. Re-running is cheap: already-scored jobs and already-tailored resumes are cached and skipped (saves 15-20 minutes on the second run).
 
-1. Create `src/scrapers/my_site.py`
-2. Extend `BaseScraper` and implement `scrape(keywords, location, pages)`
-3. Set `SOURCE = "my_site"`
-4. Return list of dicts with keys: `title, company, location, experience, salary, job_type, posted_date, description, url`
-5. Register in `src/scrapers/__init__.py`
-
-```python
-from .base import BaseScraper
-
-class MySiteScraper(BaseScraper):
-    SOURCE = "my_site"
-
-    def scrape(self, keywords, location, pages):
-        jobs = []
-        for page in range(1, pages + 1):
-            self._delay()
-            soup = self._get(f"https://mysite.com/jobs?q={'+'.join(keywords)}&page={page}")
-            if not soup:
-                continue
-            # Parse jobs...
-            jobs.append(self._normalize_job({...}))
-        return jobs
-```
-
-## Contributing
-
-1. Fork the repo
-2. Create a feature branch (`git checkout -b feature/new-scraper`)
-3. Commit your changes
-4. Push and open a Pull Request
-
-## License
-
-MIT License. See [LICENSE](LICENSE) for details.
+The tailoring pass has a **validator** that compares the AI-rewritten resume to your original JSON. If it detects a fabricated skill, altered company name, or changed date, the rewrite is rejected. The AI can reorder, emphasise, and rephrase — but never invent.
 
 ---
 
-Built with Claude AI by [Parth Parmar](https://github.com/parth-r-parmar)
+## How this compares to alternatives
+
+| | ai-job-pipeline | Paid tools (Rezi / Teal / JobScan) | ChatGPT copy-paste | Other OSS scrapers |
+|---|---|---|---|---|
+| **Cost** | Free | $10–30/mo | Free-ish (rate limits) | Free |
+| **Data stays local** | ✅ | ❌ (cloud) | ❌ (OpenAI) | ✅ |
+| **End-to-end (scrape → score → tailor → PDF)** | ✅ | ❌ (tailor only) | ❌ (manual paste per JD) | ❌ (scrape only) |
+| **Ghost-job detection** | ✅ Python heuristics | ❌ | ❌ | ❌ |
+| **Indian market (LPA, product companies)** | ✅ first-class | ⚠️ generic | ❌ manual | ⚠️ |
+| **Hallucination guard (no invented skills)** | ✅ validator | ⚠️ varies | ❌ (your responsibility) | N/A |
+| **Cold outreach list** | ✅ 20 curated + LinkedIn | ❌ | ❌ | ❌ |
+| **Batch PDF generation** | ✅ | ❌ (one at a time) | ❌ | ❌ |
+
+---
+
+## GUI vs CLI feature matrix
+
+Everything you can do in the GUI, you can do in the CLI. A few power-user flags are CLI-only because they wouldn't make sense in a web form.
+
+| Feature | Web GUI | CLI flag | Notes |
+|---|---|---|---|
+| Keywords | text input | `--keywords` | |
+| Location | text + autocomplete | `--location` | Freeform — "Ahmedabad", "Singapore", anything |
+| Pages to scrape | number input | `--pages` | |
+| Scraper selection | checkboxes | `--scrapers` | |
+| Include remote jobs | checkbox | *(default on; `--no-remote` opts out)* | |
+| AI scorer (api / cli) | radio | `--scorer` | CLI mode needs Claude Code installed |
+| PDF style | radio | `--pdf-style` | Default `classic` — no Playwright required |
+| Min salary (LPA) | number input | *(env-var `MIN_SALARY_LPA`)* | GUI writes to env at runtime |
+| Match threshold | number input | *(env-var `MATCH_THRESHOLD`)* | Same |
+| Dry run (no tailoring) | checkbox | `--dry-run` | |
+| Force re-process | checkbox | `--force` | |
+| Demo (sample data) | Demo button | `--demo` | |
+| Open top N in tabs | button in stats bar | `--open-top` | GUI uses one `window.open()` per URL |
+| **Schedule recurring scan** | — | `--schedule daily\|weekly\|off` | CLI-only: drops a crontab / Task Scheduler entry |
+| **Custom output path** | — | `--output path.xlsx` | CLI-only |
+
+---
+
+## CLI usage examples
+
+```bash
+# Dry run — scrape + score only, no tailored PDFs
+python -m src.main --dry-run --keywords "Full Stack Developer"
+
+# Use Claude Code CLI instead of Anthropic API (no API key needed)
+python -m src.main --scorer cli --keywords "React Developer"
+
+# Modern PDFs (needs one-time setup)
+pip install playwright && playwright install chromium
+python -m src.main --pdf-style modern
+
+# Open top 10 job URLs in browser after export
+python -m src.main --open-top 10
+
+# Install a daily recurring scan (uses OS scheduler)
+python -m src.main --schedule daily --keywords "React Developer"
+python -m src.main --schedule off  # remove it
+
+# Force re-score + re-tailor everything (ignores cached scores)
+python -m src.main --force
+
+# Separately: generate a general (no-JD) resume PDF from resume.json
+python gen_general_resume.py
+```
+
+---
+
+## Full CLI flag reference
+
+<details>
+<summary>Click to expand</summary>
+
+```
+python -m src.main [-h]
+  --keywords / -k       Search keywords (default: auto-generated from your resume)
+  --location / -l       Job location (default: India; accepts any string)
+  --pages / -p          Pages per site (default: 3)
+  --dry-run             Scrape + score only, skip tailoring
+  --output / -o         Output Excel path (default: output/jobs.xlsx)
+  --scrapers / -s       Pick specific scrapers: naukri indeed linkedin internshala
+  --no-remote           Skip the remote-jobs scrape pass
+  --pdf-style           classic (default), modern (HTML + Playwright), or both
+  --scorer              api (uses ANTHROPIC_API_KEY) or cli (uses Claude Code login)
+  --open-top N          Open top N job URLs in browser after export
+  --schedule            daily / weekly / off — install or remove a recurring scan
+  --demo                Run against sample data; no scraping, no AI, ~1 second
+  --force               Ignore cached scores, re-process everything from scratch
+```
+
+</details>
+
+---
+
+## Development
+
+```bash
+# Install dev tools
+pip install -r requirements-dev.txt
+
+# Run the test suite (covers routes, HTML landmarks, theme toggle, CLI preview,
+# icon sprite, default PDF style, sort behaviour, resume-exists endpoint, …)
+python -m pytest tests/ -v
+```
+
+21+ pytest tests, runs in under a second. No Playwright dependency for the test suite; Playwright is used separately for interactive verification.
+
+### Project layout
+
+```
+ai-job-pipeline/
+├── app.py                  # Flask web GUI
+├── src/
+│   ├── main.py             # CLI entrypoint + orchestration
+│   ├── scrapers/           # LinkedIn, Internshala, Naukri, Indeed
+│   ├── scorer.py           # Anthropic SDK scorer
+│   ├── scorer_cli.py       # Claude Code CLI scorer (no API key)
+│   ├── tailor.py           # Resume tailoring (with hallucination validator)
+│   ├── ghost_detector.py   # Heuristics, no AI
+│   ├── filters.py          # Salary, internship, product/service classifier
+│   └── exporter.py         # 4-sheet Excel writer
+├── static/                 # GUI CSS + JS
+├── templates/index.html    # Single-page GUI template
+├── tests/                  # pytest suite
+└── screenshots/            # Reference captures (dark/light/mobile)
+```
+
+---
+
+## Known limitations
+
+- **Naukri** API returns 400 intermittently → HTML fallback with rotating user-agents
+- **Indeed** has Cloudflare anti-bot → 403 on most attempts. Shipped as a known limit rather than fake success.
+- **LinkedIn** scraper uses the public guest API; only listing-level data is reliably fetched (detail pages are harder)
+- Resume tailor is **conservative by design** — it reorders bullets and swaps vocabulary, but never adds new experience, changes dates, or alters company names. This is a feature.
+
+---
+
+## License
+
+MIT. Use it, fork it, ship derivatives. PRs welcome.
